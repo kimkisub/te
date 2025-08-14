@@ -1,5 +1,6 @@
 import pandas as pd
 import os
+import streamlit as st # st.error를 사용하기 위해 추가
 
 # 파일 경로 설정
 DATA_FOLDER = "date"
@@ -21,13 +22,12 @@ def save_user(new_user_id, new_user_pw):
     """새로운 사용자 정보를 CSV 파일에 저장합니다."""
     try:
         users_df = load_users()
-        new_user_data = {'id': new_user_id, 'password': new_user_pw}
-        
-        # 기존 데이터를 딕셔너리 리스트로 변환하고 새 데이터를 추가
-        updated_data_list = users_df.to_dict('records')
-        updated_data_list.append(new_user_data)
-        
-        updated_df = pd.DataFrame(updated_data_list)
+        # 데이터가 없을 경우 초기 DataFrame을 생성
+        if users_df.empty:
+            updated_df = pd.DataFrame([{'id': new_user_id, 'password': new_user_pw}])
+        else:
+            new_user_data = pd.DataFrame([{'id': new_user_id, 'password': new_user_pw}])
+            updated_df = pd.concat([users_df, new_user_data], ignore_index=True)
         
         if not os.path.exists(DATA_FOLDER):
             os.makedirs(DATA_FOLDER)
